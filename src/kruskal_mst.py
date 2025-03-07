@@ -90,5 +90,9 @@ def kruskal_mst(graph):
     for weight, u, v in sorted_edges:
         if disjoint_set.union(u, v):
             mst.append((weight, u, v))
+            
+            # Stop when we have V-1 edges (a complete spanning tree)
+            if len(mst) == vertices - 1:
+                break
     
     return mst
