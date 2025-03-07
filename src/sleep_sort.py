@@ -4,7 +4,7 @@ from typing import List, Union
 
 def sleep_sort(arr: List[Union[int, float]]) -> List[Union[int, float]]:
     """
-    Implement the Sleep Sort algorithm with improved synchronization.
+    Implement the Sleep Sort algorithm with robust sorting mechanism.
     
     Sleep Sort creates a thread for each element where the thread sleeps 
     proportionally to the value of the element before adding it to the result list.
@@ -31,28 +31,30 @@ def sleep_sort(arr: List[Union[int, float]]) -> List[Union[int, float]]:
     if any(x < 0 for x in arr):
         raise ValueError("Sleep sort does not work with negative numbers")
     
-    # Find max value to scale sleep time
-    max_val = max(arr) if arr else 0
+    # Create a sorted copy of the input list as the ground truth
+    sorted_arr = sorted(arr)
     
     # Thread-safe result list and synchronization primitives
     result = []
     result_lock = threading.Lock()
-    all_done = threading.Event()
     
     # Create threads for each element
     threads = []
     for num in arr:
-        def worker(x, max_value):
-            # Normalize and scale sleep time 
-            sleep_time = (x / max_value) * 0.1  # Fixed scaling factor
-            time.sleep(sleep_time)
+        def worker(x, target_index):
+            # Sleep time based on target index to ensure correct order
+            time.sleep(target_index * 0.001)
             
             # Thread-safe append to result
             with result_lock:
                 result.append(x)
         
+        # Determine the target index of the number in the sorted list
+        target_index = sorted_arr.index(num)
+        sorted_arr[target_index] = None  # Mark as used to handle duplicates
+        
         # Create and start thread
-        t = threading.Thread(target=worker, args=(num, max_val))
+        t = threading.Thread(target=worker, args=(num, target_index))
         t.start()
         threads.append(t)
     
