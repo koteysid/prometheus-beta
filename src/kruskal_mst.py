@@ -69,10 +69,10 @@ def kruskal_mst(graph):
     if not graph:
         return []
     
-    # Validate graph edge format
+    # Validate graph edge format and ensure correct tuple structure
     try:
         # Sort edges by weight in ascending order
-        sorted_edges = sorted(graph, key=lambda x: x[0])
+        sorted_edges = sorted([(edge[0], edge[1], edge[2]) for edge in graph], key=lambda x: x[0])
     except (TypeError, IndexError):
         raise TypeError("Graph must be a list of (weight, u, v) tuples")
     
