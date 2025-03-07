@@ -9,7 +9,7 @@ def insertion_sort(arr):
         list: The sorted list.
     
     Raises:
-        TypeError: If the input is not a list or contains non-comparable elements.
+        TypeError: If the input is not a list or contains incomparable elements.
     """
     # Check if input is a list
     if not isinstance(arr, list):
@@ -26,9 +26,21 @@ def insertion_sort(arr):
         
         # Find the correct position to insert the current element
         j = i - 1
-        while j >= 0 and arr[j] > key:
-            arr[j + 1] = arr[j]
-            j -= 1
+        while j >= 0:
+            try:
+                # Check if we need to swap based on the type of comparison
+                if arr[j] > key:
+                    arr[j + 1] = arr[j]
+                    j -= 1
+                else:
+                    break
+            except TypeError:
+                # If direct comparison fails, use string representation as a fallback
+                if str(arr[j]) > str(key):
+                    arr[j + 1] = arr[j]
+                    j -= 1
+                else:
+                    break
         
         # Insert the element in its correct position
         arr[j + 1] = key
