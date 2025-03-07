@@ -5,39 +5,6 @@ This module provides a basic implementation of the LZ4 compression algorithm.
 Note: This is a simplified version and not a full production-ready LZ4 implementation.
 """
 
-def find_match(data, start, window_size):
-    """
-    Find the longest matching sequence within the given window.
-    
-    Args:
-        data (bytes): Input data
-        start (int): Current position
-        window_size (int): Look-back window size
-    
-    Returns:
-        tuple: (match_length, match_offset)
-    """
-    best_match_length = 0
-    best_match_offset = 0
-    
-    # Search window
-    window_start = max(0, start - window_size)
-    for j in range(window_start, start):
-        # Check match length
-        match_length = 0
-        while (start + match_length < len(data) and 
-               j + match_length < start and 
-               data[j + match_length] == data[start + match_length] and 
-               match_length < 15):
-            match_length += 1
-        
-        # Update best match
-        if match_length > best_match_length:
-            best_match_length = match_length
-            best_match_offset = start - j
-    
-    return best_match_length, best_match_offset
-
 def lz4_compress(data):
     """
     Compress input data using a simplified LZ4 compression algorithm.
@@ -64,24 +31,36 @@ def lz4_compress(data):
         raise TypeError("Input must be bytes or str")
     
     compressed = bytearray()
-    window_size = 65535
-    
     i = 0
+    
     while i < len(data):
-        # Find best match
-        match_length, match_offset = find_match(data, i, window_size)
+        # Look for matches in a sliding window
+        best_match_length = 0
+        best_match_offset = 0
+        window_start = max(0, i - 65535)
         
-        # Encode token
-        if match_length >= 4:
-            # Match token (token | offset)
-            token = min(15, match_length - 4) << 4 | (match_offset >> 8)
-            offset_low = match_offset & 0xFF
+        for j in range(window_start, i):
+            match_length = 0
             
-            # Append token and offset
+            # Verify sequential match
+            while (i + match_length < len(data) and 
+                   j + match_length < i and 
+                   data[j + match_length] == data[i + match_length] and 
+                   match_length < 15):
+                match_length += 1
+            
+            # Update best match if longer
+            if match_length > best_match_length:
+                best_match_length = match_length
+                best_match_offset = i - j
+        
+        # Decide whether to encode a match or literal
+        if best_match_length >= 4:
+            # Match token with length and offset
+            token = (best_match_length - 4) << 4 | (best_match_offset >> 8)
             compressed.append(token)
-            compressed.append(offset_low)
-            
-            i += match_length
+            compressed.append(best_match_offset & 0xFF)
+            i += best_match_length
         else:
             # Literal token
             compressed.append(data[i])
@@ -110,7 +89,6 @@ def lz4_decompress(data):
     if not isinstance(data, bytes):
         raise TypeError("Input must be bytes")
     
-    # Decode data
     decompressed = bytearray()
     i = 0
     
@@ -125,11 +103,9 @@ def lz4_decompress(data):
         
         # Literal length
         literal_length = token >> 4
-        literal_copy_len = 0
         
-        # Compute literal length 
+        # Extended literal length
         if literal_length == 15:
-            # Extended literal length
             while i < len(data) and data[i] == 255:
                 literal_length += 255
                 i += 1
@@ -138,26 +114,28 @@ def lz4_decompress(data):
                 literal_length += data[i]
                 i += 1
         
-        # Safely copy literals
+        # Copy literals safely
         literal_copy_len = min(literal_length, len(data) - i)
         decompressed.extend(data[i:i+literal_copy_len])
         i += literal_copy_len
         
-        # Check if we've reached the end 
+        # Check end of data
         if i >= len(data):
             break
         
-        # Match offset 
+        # Match offset
         match_offset = data[i] | (token & 0x0F) << 8
         i += 1
         
         # Match length
         match_length = (token >> 4) + 4
         
-        # Reproduce match 
+        # Reproduce match
         for _ in range(match_length):
+            # Protect against invalid offsets
             if match_offset > len(decompressed):
                 break
+            
             repeated_byte = decompressed[-match_offset]
             decompressed.append(repeated_byte)
     
