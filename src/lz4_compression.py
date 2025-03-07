@@ -35,35 +35,33 @@ def lz4_compress(data):
     i = 0
     
     while i < len(data):
-        # Look-ahead window
-        window_start = max(0, i - 65535)
-        current_match_length = 0
-        current_match_offset = 0
+        # Look for repeated sequences
+        best_match_length = 0
+        best_match_offset = 0
         
-        # Find longest match in the window
-        for j in range(window_start, i):
-            match_length = 0
-            while (i + match_length < len(data) and 
-                   data[j + match_length] == data[i + match_length] and 
-                   match_length < 255):
-                match_length += 1
+        # Search back in the data for longest matching sequence
+        search_window_start = max(0, i - 65535)
+        for j in range(search_window_start, i):
+            current_match_length = 0
+            
+            # Determine the match length
+            while (i + current_match_length < len(data) and 
+                   data[j + current_match_length] == data[i + current_match_length] and 
+                   current_match_length < 264):  # Max match length of 264
+                current_match_length += 1
             
             # Update best match if found
-            if match_length > current_match_length:
-                current_match_length = match_length
-                current_match_offset = i - j
+            if current_match_length > best_match_length:
+                best_match_length = current_match_length
+                best_match_offset = i - j
         
         # Encode the match or literal
-        if current_match_length >= 4:
+        if best_match_length > 4:
             # Encode match
-            if current_match_length < 15:
-                compressed.append(current_match_length << 4 | (current_match_offset >> 8))
-            else:
-                compressed.append(0xF0 | (current_match_offset >> 8))
-                compressed.append(current_match_length - 15)
-            
-            compressed.append(current_match_offset & 0xFF)
-            i += current_match_length
+            token = (best_match_length - 4) << 4 | (best_match_offset >> 8)
+            compressed.append(token)
+            compressed.append(best_match_offset & 0xFF)
+            i += best_match_length
         else:
             # Encode literal
             compressed.append(data[i])
@@ -103,6 +101,8 @@ def lz4_decompress(data):
         
         # Literals length
         literal_length = token >> 4
+        
+        # Copy literals
         if literal_length == 15:
             # Extended literal length
             while data[i] == 255:
@@ -112,8 +112,9 @@ def lz4_decompress(data):
             i += 1
         
         # Copy literals
-        decompressed.extend(data[i:i+literal_length])
-        i += literal_length
+        if literal_length > 0:
+            decompressed.extend(data[i:i+literal_length])
+            i += literal_length
         
         # If we're at the end, break
         if i >= len(data):
@@ -124,17 +125,14 @@ def lz4_decompress(data):
         i += 1
         
         # Match length
-        match_length = token >> 4
-        if match_length == 15:
-            # Extended match length
-            while data[i] == 255:
-                match_length += 255
-                i += 1
-            match_length += data[i]
-            i += 1
+        match_length = (token >> 4) + 4
         
         # Reproduce matched sequence
-        for _ in range(match_length + 4):
-            decompressed.append(decompressed[-match_offset])
+        if match_offset > len(decompressed):
+            raise ValueError("Invalid compression: match offset out of range")
+        
+        for _ in range(match_length):
+            repeated_byte = decompressed[-match_offset]
+            decompressed.append(repeated_byte)
     
     return bytes(decompressed)
