@@ -35,16 +35,16 @@ def lz4_compress(data):
     i = 0
     
     while i < len(data):
-        # Find longest match
+        # Find the longest match within the lookback window
         best_match_length = 0
         best_match_offset = 0
         
-        # Look back in data for matches
-        window_start = max(0, i - 65535)
-        for j in range(window_start, i):
+        # Determine search window (last 65535 bytes)
+        lookback_start = max(0, i - 65535)
+        
+        for j in range(lookback_start, i):
+            # Check for match length
             match_length = 0
-            
-            # Determine match length
             while (i + match_length < len(data) and 
                    data[j + match_length] == data[i + match_length] and 
                    match_length < 15):
@@ -55,15 +55,13 @@ def lz4_compress(data):
                 best_match_length = match_length
                 best_match_offset = i - j
         
-        # Encode match or literal
         if best_match_length >= 4:
-            # Encode match token
-            token = best_match_length << 4
-            compressed.append(token | (best_match_offset >> 8))
+            # We have a good match - encode match
+            compressed.append((best_match_length << 4) | (best_match_offset >> 8))
             compressed.append(best_match_offset & 0xFF)
             i += best_match_length
         else:
-            # Encode literal
+            # No match - encode literal
             compressed.append(data[i])
             i += 1
     
@@ -106,14 +104,25 @@ def lz4_decompress(data):
         literal_length = token >> 4
         
         # Copy literals
-        if literal_length > 0:
-            if i + literal_length > len(data):
-                raise ValueError("Invalid compressed data: literal length exceeds data")
+        if literal_length == 15:
+            # Extended literals
+            while i < len(data) and data[i] == 255:
+                literal_length += 255
+                i += 1
             
-            decompressed.extend(data[i:i+literal_length])
-            i += literal_length
+            if i < len(data):
+                literal_length += data[i]
+                i += 1
         
-        # Check if we've reached end of data
+        # Make sure we don't go out of bounds
+        literal_copy_len = min(literal_length, len(data) - i)
+        
+        # Copy literals
+        if literal_copy_len > 0:
+            decompressed.extend(data[i:i+literal_copy_len])
+            i += literal_copy_len
+        
+        # Check if we've reached the end of data
         if i >= len(data):
             break
         
@@ -122,16 +131,25 @@ def lz4_decompress(data):
         i += 1
         
         # Match length
-        match_length = token >> 4 + 4
+        match_length = token >> 4
+        if match_length == 15:
+            # Extended match length
+            while i < len(data) and data[i] == 255:
+                match_length += 255
+                i += 1
+            
+            if i < len(data):
+                match_length += data[i]
+                i += 1
         
-        # Reproduce match
+        match_length += 4
+        
+        # Reproduce match safely
         for _ in range(match_length):
-            try:
-                # If match point is 0, this is OK for LZ4 algorithm
-                repeated_byte = decompressed[-match_offset]
-                decompressed.append(repeated_byte)
-            except IndexError:
-                # If we can't find match, stop decompression to avoid data corruption
+            if match_offset > len(decompressed):
                 break
+            
+            repeated_byte = decompressed[-match_offset]
+            decompressed.append(repeated_byte)
     
     return bytes(decompressed)
