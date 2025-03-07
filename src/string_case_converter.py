@@ -1,3 +1,5 @@
+import re
+
 def to_kebab_case(input_string: str) -> str:
     """
     Convert a given string to kebab-case.
@@ -36,29 +38,17 @@ def to_kebab_case(input_string: str) -> str:
     if not input_string:
         return ""
     
-    # Normalize the string: replace underscores and spaces with hyphens
-    normalized = input_string.replace('_', ' ').replace('-', ' ')
+    # Use regex to split the string into words
+    # This handles multiple cases: camelCase, PascalCase, snake_case, space separated, and mixed scenarios
+    words = re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z][a-z]|\d|\W|$)|\d+', input_string)
     
-    # Split the string by uppercase letters and whitespace
-    words = []
-    current_word = normalized[0].lower()
-    for char in normalized[1:]:
-        if char.isupper():
-            # When an uppercase letter is found, start a new word
-            words.append(current_word)
-            current_word = char.lower()
-        elif char.isspace():
-            # When a space is found, append current word and reset
-            if current_word:
-                words.append(current_word)
-            current_word = ''
-        else:
-            # Add lowercase character to current word
-            current_word += char.lower()
-    
-    # Append the last word
-    if current_word:
-        words.append(current_word)
+    # Convert words to lowercase and remove any non-alphanumeric characters
+    clean_words = []
+    for word in words:
+        # Remove any non-letter characters and convert to lowercase
+        clean_word = re.sub(r'[^a-zA-Z]', '', word).lower()
+        if clean_word:
+            clean_words.append(clean_word)
     
     # Join words with hyphens
-    return '-'.join(words)
+    return '-'.join(clean_words)
