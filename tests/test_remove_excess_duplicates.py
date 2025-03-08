@@ -15,7 +15,7 @@ def test_remove_excess_duplicates():
     assert remove_excess_duplicates("ab") == "ab"
     
     # Test more complex scenario
-    assert remove_excess_duplicates("aaaaabbbbccccdddeee") == "aabbccddde"
+    assert remove_excess_duplicates("aaaaabbbbccccdddeee") == "aabbccddee"
     
     # Test mixed character types
     assert remove_excess_duplicates("112233aabbccddee") == "1233aabbccddee"
