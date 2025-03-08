@@ -19,6 +19,7 @@ def test_single_element_scenarios():
 def test_multiple_paths():
     # Scenarios with multiple possible paths
     result = min_steps_to_target_sum([1, 2, 3, 4, 5], 7)
+    assert result is not None
     assert result in [2, 3]
     
 def test_negative_numbers():
