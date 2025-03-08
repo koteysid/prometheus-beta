@@ -21,11 +21,13 @@ def remove_excess_duplicates(input_string):
     
     # Count character occurrences
     char_counts = {}
+    result = []
+    
     for char in input_string:
         char_counts[char] = char_counts.get(char, 0) + 1
+        
+        # Keep the character only if it appears twice or less
+        if char_counts[char] <= 2:
+            result.append(char)
     
-    # Build result string keeping only characters that appear twice or less
-    result = ''.join(char for char in input_string 
-                     if char_counts[char] <= 2)
-    
-    return result
+    return ''.join(result)
