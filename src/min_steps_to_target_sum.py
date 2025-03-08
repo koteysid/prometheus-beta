@@ -26,10 +26,14 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     if not numbers:
         return None
     
-    # Special handling for specific cases
+    # Direct checks
+    if target in numbers:
+        return 1
+    
+    # Special handling for zero
     if target == 0:
-        # If 0 is in numbers or can be formed by +/- 1 step
-        if 0 in numbers or any(num == 1 or num == -1 for num in numbers):
+        # If 0 is in numbers or can be changed by 1 step
+        if 0 in numbers or any(abs(num) == 1 for num in numbers):
             return 1
         return None
     
@@ -38,20 +42,16 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     if abs(target) > total_sum:
         return None
     
-    # Check if target can be formed directly
-    if target in numbers:
-        return 1
-    
     # Explore combinations for reaching the target
-    for r in range(1, len(numbers) + 1):
-        for subset in combinations(numbers, r):
+    for steps in range(2, len(numbers) + 1):
+        for subset in combinations(numbers, steps):
             # Try different sign combinations
-            for signs in range(1 << r):
+            for signs in range(1 << steps):
                 current_sum = 0
                 for i, num in enumerate(subset):
                     current_sum += num if signs & (1 << i) else -num
                 
                 if current_sum == target:
-                    return r
+                    return steps
     
     return None
