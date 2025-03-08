@@ -27,11 +27,10 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     if not numbers:
         return None
     
-    # If numbers and target are empty/zero
-    if target == 0:
-        if 0 in numbers:
-            return 1
-        return 0
+    # Precompute sums to help with early filtering
+    total_sum = sum(abs(num) for num in numbers)
+    if target > total_sum or target < -total_sum:
+        return None
     
     # Try all possible ways to reach target using addition/subtraction
     for step_count in range(1, len(numbers) + 1):
