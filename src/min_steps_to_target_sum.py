@@ -1,4 +1,5 @@
 from typing import List, Optional
+from itertools import combinations
 
 def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     """
@@ -17,7 +18,7 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     Space Complexity: O(n)
     
     Examples:
-        >>> min_steps_to_target_sum([1, 2, 3, 4], 7)  # 2 steps: 3 + 4 = 7 
+        >>> min_steps_to_target_sum([1, 2, 3, 4], 7)  # 3 + 4 = 7 
         2
         >>> min_steps_to_target_sum([1, 2, 3, 4], 10)  # None 
         None
@@ -26,28 +27,15 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     if not numbers:
         return None
     
-    def backtrack(index: int, current_sum: int) -> Optional[int]:
-        # Base cases
-        if current_sum == target:
-            return 0
-        
-        # Stop if we've gone through all numbers
-        if index >= len(numbers):
-            return None
-        
-        # Try adding the current number
-        add_result = backtrack(index + 1, current_sum + numbers[index])
-        if add_result is not None:
-            add_result += 1
-        
-        # Try subtracting the current number 
-        sub_result = backtrack(index + 1, current_sum - numbers[index])
-        if sub_result is not None:
-            sub_result += 1
-        
-        # Return the minimum of valid results
-        results = [r for r in [add_result, sub_result] if r is not None]
-        return min(results) if results else None
+    # Try all possible ways to reach target using addition/subtraction
+    for step_count in range(len(numbers) + 1):
+        for subset in combinations(numbers, step_count):
+            # Check positive combination
+            if sum(subset) == target:
+                return step_count
+            
+            # Check negative combination
+            if sum(num * (-1 if num in subset else 1) for num in numbers) == target:
+                return step_count
     
-    # Try starting from the very beginning
-    return backtrack(0, 0)
+    return None
