@@ -21,11 +21,15 @@ def test_empty_list():
     result = analyze_number_list([])
     assert result == (0, 0)
 
-def test_negative_numbers():
-    """Test with a list containing negative and positive numbers."""
+def test_positive_and_negative_even_numbers():
+    """Test with a list containing both positive and negative even numbers."""
     result = analyze_number_list([-1, -2, -3, -4, 5, 6])
-    result = analyze_number_list([-1, -2, -3, -4, 5, 6])
-    assert result == (2, 3)
+    assert result == (-6, 3)
+
+def test_multiple_even_numbers():
+    """Test with multiple even numbers, some positive and some negative."""
+    result = analyze_number_list([-2, 2, -4, 4, 6, -8])
+    assert result == (0, 1)
 
 def test_invalid_input_non_list():
     """Test that a TypeError is raised for non-list input."""
