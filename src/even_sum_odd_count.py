@@ -21,8 +21,8 @@ def analyze_number_list(numbers):
     if not all(isinstance(num, int) for num in numbers):
         raise TypeError("All elements must be integers")
     
-    # Calculate sum of even numbers and count of odd numbers
-    even_sum = sum(num for num in numbers if num % 2 == 0)
+    # Calculate sum of positive even numbers and count of odd numbers
+    even_sum = sum(num for num in numbers if num % 2 == 0 and num > 0)
     odd_count = sum(1 for num in numbers if num % 2 != 0)
     
     return even_sum, odd_count
