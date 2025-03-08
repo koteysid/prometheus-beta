@@ -3,7 +3,7 @@ from src.remove_excess_duplicates import remove_excess_duplicates
 
 def test_remove_excess_duplicates():
     # Test basic scenario with duplicates
-    assert remove_excess_duplicates("aabbccc") == "aabb"
+    assert remove_excess_duplicates("aabbccc") == "aabbcc"
     
     # Test string with no duplicates
     assert remove_excess_duplicates("abcde") == "abcde"
