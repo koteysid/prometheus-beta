@@ -26,6 +26,9 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     if not numbers:
         return None
     
+    # Precompute the maximum possible sum with these numbers
+    max_sum = sum(sorted(numbers, reverse=True)[:len(numbers)//2 + 1])
+    
     # Direct checks
     if target in numbers:
         return 1
@@ -34,9 +37,8 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     if target == 0:
         return 1
     
-    # Precompute some information
-    total_sum = sum(abs(x) for x in numbers)
-    if abs(target) > total_sum:
+    # Impossible scenarios 
+    if abs(target) > max_sum:
         return None
     
     # Explore combinations for reaching the target
