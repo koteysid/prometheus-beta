@@ -18,7 +18,7 @@ def test_remove_excess_duplicates():
     assert remove_excess_duplicates("aaaaabbbbccccdddeee") == "aabbccddee"
     
     # Test mixed character types
-    assert remove_excess_duplicates("112233aabbccddee") == "1233aabbccddee"
+    assert remove_excess_duplicates("112233aabbccddee") == "112233aabbccddee"
     
     # Test with special characters
     assert remove_excess_duplicates("!!@@##$$%%") == "!!@@##$$%%"
