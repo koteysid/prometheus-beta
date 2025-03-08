@@ -1,5 +1,4 @@
 from typing import List, Optional
-from itertools import combinations
 
 def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     """
@@ -23,26 +22,31 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
         >>> min_steps_to_target_sum([1, 2, 3, 4], 10)  # None 
         None
     """
-    # Edge cases
+    # Early exits
     if not numbers:
         return None
     
-    # Precompute sums to help with early filtering
-    total_sum = sum(abs(num) for num in numbers)
-    if target > total_sum or target < -total_sum:
-        return None
+    def dfs(index: int, current_sum: int, steps: int) -> Optional[int]:
+        # Reached target
+        if current_sum == target:
+            return steps
+        
+        # Gone past all numbers
+        if index >= len(numbers):
+            return None
+        
+        # Try adding current number
+        add_result = dfs(index + 1, current_sum + numbers[index], steps + 1)
+        
+        # Try subtracting current number
+        sub_result = dfs(index + 1, current_sum - numbers[index], steps + 1)
+        
+        # Skip current number
+        skip_result = dfs(index + 1, current_sum, steps)
+        
+        # Find minimum of valid results
+        results = [r for r in [add_result, sub_result, skip_result] if r is not None]
+        
+        return min(results) if results else None
     
-    # Try all possible ways to reach target using addition/subtraction
-    for step_count in range(1, len(numbers) + 1):
-        for subset in combinations(numbers, step_count):
-            # Check all sign combinations for subset
-            for signs in range(1 << step_count):
-                current_sum = 0
-                for i, num in enumerate(subset):
-                    # Use bit manipulation to determine sign
-                    current_sum += num if signs & (1 << i) else -num
-                
-                if current_sum == target:
-                    return step_count
-    
-    return None
+    return dfs(0, 0, 0)
