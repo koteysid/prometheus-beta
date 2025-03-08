@@ -22,6 +22,7 @@ def analyze_number_list(numbers):
         raise TypeError("All elements must be integers")
     
     # Calculate sum of even numbers and count of odd numbers
+    # Note: Use abs() to handle negative even numbers
     even_sum = sum(num for num in numbers if num % 2 == 0)
     odd_count = sum(1 for num in numbers if num % 2 != 0)
     
