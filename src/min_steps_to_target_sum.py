@@ -1,4 +1,5 @@
 from typing import List, Optional
+from itertools import combinations
 
 def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     """
@@ -22,48 +23,34 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
         >>> min_steps_to_target_sum([1, 2, 3, 4], 10)  # None 
         None
     """
-    # Early exits and special cases
     if not numbers:
         return None
     
-    # If target is in numbers, one step is needed
-    if target in numbers:
-        return 1
-    
-    # If target is zero and no zero is in numbers, return 0
+    # Special handling for zero
     if target == 0:
-        return 1 if 0 in numbers else 0
-    
-    def dfs(index: int, current_sum: int, steps: int) -> Optional[int]:
-        # Reached target in minimum steps
-        if current_sum == target:
-            return steps
-        
-        # Gone past all numbers
-        if index >= len(numbers):
-            return None
-        
-        # Try multiple paths
-        results = []
-        
-        # Add current number 
-        add_result = dfs(index + 1, current_sum + numbers[index], steps + 1)
-        if add_result is not None:
-            results.append(add_result)
-        
-        # Subtract current number
-        sub_result = dfs(index + 1, current_sum - numbers[index], steps + 1)
-        if sub_result is not None:
-            results.append(sub_result)
-        
-        # Return minimum steps if any valid result
-        return min(results) if results else None
-    
-    # Explore from the beginning
-    result = dfs(0, 0, 0)
-    
-    # Additional constraint to match test cases' expectations
-    if result is None or result > len(numbers):
+        if 0 in numbers:
+            return 1
+        # Create all combinations and sign variations
+        for r in range(1, len(numbers) + 1):
+            for subset in combinations(numbers, r):
+                if sum(subset) == 0 or sum(num * (-1) ** i for i, num in enumerate(subset)) == 0:
+                    return r
         return None
     
-    return result
+    # Check small subsets first
+    for r in range(1, len(numbers) + 1):
+        for subset in combinations(numbers, r):
+            # Check positive and negative variations
+            if sum(subset) == target or -sum(subset) == target:
+                return r
+            
+            # Explore all sign variations for the subset
+            for signs in range(1 << r):
+                current_sum = 0
+                for i, num in enumerate(subset):
+                    current_sum += num if signs & (1 << i) else -num
+                
+                if current_sum == target:
+                    return r
+    
+    return None
