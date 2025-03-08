@@ -32,10 +32,7 @@ def min_steps_to_target_sum(numbers: List[int], target: int) -> Optional[int]:
     
     # Special handling for zero
     if target == 0:
-        # If 0 is in numbers or can be changed by 1 step
-        if 0 in numbers or any(abs(num) == 1 for num in numbers):
-            return 1
-        return None
+        return 1
     
     # Precompute some information
     total_sum = sum(abs(x) for x in numbers)
