@@ -27,40 +27,48 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
     if not graph:
         raise ValueError("Graph cannot be empty")
     
-    def dfs(node: int) -> bool:
+    def dfs(node: int, visited: Set[int], parent: int) -> bool:
         """
         Depth-first search to detect cycles in an undirected graph.
         
         Args:
-            node (int): Starting node to begin DFS
+            node (int): Current node being visited
+            visited (Set[int]): Set of nodes already visited
+            parent (int): Parent node of the current node
         
         Returns:
             bool: True if a cycle is detected, False otherwise
         """
-        # Initialize visited set and stack for DFS
-        visited = set()
-        stack = [(node, -1)]  # (current_node, parent_node)
+        # Mark the current node as visited
+        visited.add(node)
         
-        while stack:
-            current, parent = stack.pop()
-            
-            # If node is already visited and not the parent, a cycle exists
-            if current in visited:
+        # Check all adjacent nodes
+        for neighbor in graph.get(node, []):
+            # If neighbor hasn't been visited, recursively check its connections
+            if neighbor not in visited:
+                if dfs(neighbor, visited, node):
+                    return True
+            # If neighbor has been visited and is not the parent, a cycle exists
+            elif neighbor != parent:
                 return True
-            
-            # Mark current node as visited
-            visited.add(current)
-            
-            # Explore neighbors
-            for neighbor in graph.get(current, []):
-                if neighbor != parent:
-                    stack.append((neighbor, current))
         
         return False
     
-    # Check each node as a potential starting point
+    # Track visited nodes across the entire graph
+    global_visited = set()
+    
+    # Check for cycles starting from each node
     for node in graph:
-        if dfs(node):
-            return True
+        # Only process unvisited nodes
+        if node not in global_visited:
+            # Create a new set for current component
+            component_visited = set()
+            
+            # If a cycle is found in this component, return True
+            if dfs(node, component_visited, -1):
+                return True
+            
+            # Add visited nodes from this component to global visited
+            global_visited.update(component_visited)
     
     return False
