@@ -18,7 +18,7 @@ def test_graph_without_cycle():
         2: [3],
         3: [2]
     }
-    assert has_cycle_undirected(graph) == True
+    assert has_cycle_undirected(graph) == False
 
 def test_disconnected_graph_with_multiple_cycles():
     """Test a disconnected graph with multiple cycles."""
@@ -79,4 +79,4 @@ def test_large_graph_no_cycle():
         4: [2],
         5: [3]
     }
-    assert has_cycle_undirected(graph) == True
+    assert has_cycle_undirected(graph) == False
