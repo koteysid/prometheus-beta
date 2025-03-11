@@ -30,7 +30,12 @@ def test_disconnected_graph_with_multiple_cycles():
         4: [5],
         5: [4]
     }
-    assert has_cycle_undirected(graph) == True
+    print("Debugging graph:", graph)
+    print("Nodes:", list(graph.keys()))
+    print("Edges:", [(node, neighbors) for node, neighbors in graph.items()])
+    result = has_cycle_undirected(graph)
+    print("Cycle detection result:", result)
+    assert result == True
 
 def test_disconnected_graph_without_cycle():
     """Test a disconnected graph without a cycle."""
