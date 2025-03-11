@@ -57,13 +57,15 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
     # Track visited nodes across the entire graph
     visited_nodes = set()
     
-    # Check for cycles starting from each unvisited node
+    # Check for cycles for each unvisited node
     for node in graph:
         if node not in visited_nodes:
+            # Create a new set for each component
             component_visited = set()
+            # If a cycle is found in this component, return True
             if dfs(node, component_visited, -1):
                 return True
-            # Update the overall visited nodes
+            # Add all nodes in this component to visited nodes
             visited_nodes.update(component_visited)
     
     return False
