@@ -48,11 +48,11 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
             if neighbor == parent:
                 continue
             
-            # If neighbor is already visited, a back edge exists (cycle)
+            # If neighbor is visited, a cycle exists
             if neighbor in visited:
                 return True
             
-            # Recursively explore the neighbor
+            # Recursively explore neighbor 
             if dfs(neighbor, visited, node):
                 return True
         
@@ -61,12 +61,22 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
     # Track visited nodes
     visited = set()
     
+    # Track nodes with cycles
+    cycle_nodes = set()
+    
     # Check each node as a potential starting point
     for node in graph:
         # Only process unvisited nodes
         if node not in visited:
-            # If a cycle is found, return True
-            if dfs(node, visited):
-                return True
+            component_visited = set()
+            
+            # If a cycle is found in this component
+            if dfs(node, component_visited):
+                # Add all nodes in this component to cycle_nodes
+                cycle_nodes.update(component_visited)
+            
+            # Update overall visited nodes
+            visited.update(component_visited)
     
-    return False
+    # If there are any nodes in cycle_nodes, the graph has a cycle
+    return len(cycle_nodes) > 0
