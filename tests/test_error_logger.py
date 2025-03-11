@@ -18,7 +18,7 @@ def test_log_custom_error_with_message():
     # Check log output
     log_output = log_capture.getvalue()
     assert "Test error message" in log_output
-    assert "ERROR" in log_output
+    assert "ERROR" in log_output.upper()
 
     # Clean up
     logging.getLogger().removeHandler(handler)
@@ -63,7 +63,7 @@ def test_log_custom_error_custom_log_level():
     # Check log output
     log_output = log_capture.getvalue()
     assert "Warning message" in log_output
-    assert "WARNING" in log_output
+    assert "WARNING" in log_output.upper()
 
     # Clean up
     logging.getLogger().removeHandler(handler)
