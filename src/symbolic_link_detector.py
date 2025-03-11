@@ -19,8 +19,9 @@ def is_symbolic_link(file_path):
     if not isinstance(file_path, str):
         raise TypeError("File path must be a string")
     
-    if not file_path:
-        raise ValueError("File path cannot be empty")
+    # Check for empty or whitespace-only string
+    if not file_path or file_path.isspace():
+        raise ValueError("File path cannot be empty or whitespace")
     
     # Normalize the path to handle potential relative paths
     normalized_path = os.path.normpath(file_path)
