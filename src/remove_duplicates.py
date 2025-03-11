@@ -15,13 +15,13 @@ def remove_string_duplicates(input_string):
     if not isinstance(input_string, str):
         raise TypeError("Input must be a string")
 
-    # Use a set to track seen characters while preserving order
-    seen = set()
+    # Use sets to track seen characters while preserving order and original case
+    seen_lower = set()
     result = []
     
     for char in input_string:
-        if char not in seen:
-            seen.add(char)
+        if char.lower() not in seen_lower:
+            seen_lower.add(char.lower())
             result.append(char)
     
     return ''.join(result)
