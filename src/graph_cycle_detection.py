@@ -21,7 +21,7 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
         >>> has_cycle_undirected({0: [1, 2], 1: [0, 2], 2: [0, 1]})
         True
         >>> has_cycle_undirected({0: [1], 1: [0], 2: [3], 3: [2]})
-        True
+        False
     """
     # Validate input
     if not graph:
@@ -61,9 +61,14 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
     # Check each node as a potential starting point
     for node in graph:
         if node not in visited:
+            # Create a new set for the current component
             component_visited = set()
+            
+            # If a cycle is found, return True
             if dfs(node, component_visited):
                 return True
+            
+            # Mark the entire component as visited
             visited.update(component_visited)
     
     return False
