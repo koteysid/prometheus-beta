@@ -8,33 +8,46 @@ def test_log_multi_line_default():
     """Test multi-line logging with default parameters"""
     # Capture log output
     log_capture = StringIO()
-    logging.basicConfig(stream=log_capture, level=logging.INFO)
+    root_logger = logging.getLogger()
+    handler = logging.StreamHandler(log_capture)
+    root_logger.addHandler(handler)
+    root_logger.setLevel(logging.INFO)
 
-    # Log a multi-line message
-    message = "First line\nSecond line\nThird line"
-    log_multi_line(message)
+    try:
+        # Log a multi-line message
+        message = "First line\nSecond line\nThird line"
+        log_multi_line(message)
 
-    # Get log output
-    log_output = log_capture.getvalue()
+        # Get log output
+        log_output = log_capture.getvalue()
 
-    # Check log output
-    assert '=' * 40 in log_output
-    assert 'First line' in log_output
-    assert 'Second line' in log_output
-    assert 'Third line' in log_output
+        # Check log output
+        assert '=' * 40 in log_output
+        assert 'First line' in log_output
+        assert 'Second line' in log_output
+        assert 'Third line' in log_output
+    finally:
+        # Clean up the handler
+        root_logger.removeHandler(handler)
 
 def test_log_multi_line_custom_separator():
     """Test multi-line logging with custom separator"""
     log_capture = StringIO()
-    logging.basicConfig(stream=log_capture, level=logging.INFO)
+    root_logger = logging.getLogger()
+    handler = logging.StreamHandler(log_capture)
+    root_logger.addHandler(handler)
+    root_logger.setLevel(logging.INFO)
 
-    message = "Custom separator test"
-    log_multi_line(message, separator='*', separator_length=20)
+    try:
+        message = "Custom separator test"
+        log_multi_line(message, separator='*', separator_length=20)
 
-    log_output = log_capture.getvalue()
+        log_output = log_capture.getvalue()
 
-    assert '*' * 20 in log_output
-    assert 'Custom separator test' in log_output
+        assert '*' * 20 in log_output
+        assert 'Custom separator test' in log_output
+    finally:
+        root_logger.removeHandler(handler)
 
 def test_log_multi_line_different_levels():
     """Test logging at different levels"""
@@ -49,13 +62,19 @@ def test_log_multi_line_different_levels():
 
     for level, level_name in levels:
         log_capture = StringIO()
-        logging.basicConfig(stream=log_capture, level=level)
+        root_logger = logging.getLogger()
+        handler = logging.StreamHandler(log_capture)
+        root_logger.addHandler(handler)
+        root_logger.setLevel(level)
 
-        message = f"Test {level_name} level"
-        log_multi_line(message, level=level)
+        try:
+            message = f"Test {level_name} level"
+            log_multi_line(message, level=level)
 
-        log_output = log_capture.getvalue()
-        assert message in log_output
+            log_output = log_capture.getvalue()
+            assert message in log_output
+        finally:
+            root_logger.removeHandler(handler)
 
 def test_log_multi_line_error_handling():
     """Test input validation"""
