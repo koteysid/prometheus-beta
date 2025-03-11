@@ -25,24 +25,25 @@ def log_multi_line(message, level=logging.INFO, separator='=', separator_length=
     if not isinstance(separator_length, int) or separator_length <= 0:
         raise TypeError("Separator length must be a positive integer")
 
-    # Create logger
+    # Create logger and streamline logging
     logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s') if not logger.handlers else None
 
     # Create separation line
     sep_line = separator * separator_length
 
-    # Log the message with separation lines
-    if level == logging.DEBUG:
-        log_func = logger.debug
-    elif level == logging.INFO:
-        log_func = logger.info
-    elif level == logging.WARNING:
-        log_func = logger.warning
-    elif level == logging.ERROR:
-        log_func = logger.error
-    elif level == logging.CRITICAL:
-        log_func = logger.critical
-    else:
+    # Dynamically select log function
+    log_funcs = {
+        logging.DEBUG: logger.debug,
+        logging.INFO: logger.info,
+        logging.WARNING: logger.warning,
+        logging.ERROR: logger.error,
+        logging.CRITICAL: logger.critical
+    }
+
+    # Get log function or raise error if invalid
+    log_func = log_funcs.get(level)
+    if log_func is None:
         raise ValueError("Invalid logging level")
 
     # Log with separation lines
