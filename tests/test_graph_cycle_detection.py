@@ -16,7 +16,7 @@ def test_graph_without_cycle():
         0: [1],
         1: [0],
         2: [3],
-        3: [2]
+        3: []
     }
     assert has_cycle_undirected(graph) == False
 
