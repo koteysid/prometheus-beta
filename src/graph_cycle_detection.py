@@ -60,7 +60,10 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
     # Check for cycles starting from each unvisited node
     for node in graph:
         if node not in visited_nodes:
-            if dfs(node, visited_nodes, -1):
+            component_visited = set()
+            if dfs(node, component_visited, -1):
                 return True
+            # Update the overall visited nodes
+            visited_nodes.update(component_visited)
     
     return False
