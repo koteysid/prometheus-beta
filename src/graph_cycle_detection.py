@@ -42,33 +42,40 @@ def has_cycle_undirected(graph: Dict[int, List[int]]) -> bool:
         # Mark the current node as visited
         visited.add(node)
         
+        # Track if a cycle is found in this component
+        cycle_found = False
+        
         # Explore neighbors
         for neighbor in graph.get(node, []):
             # Unvisited neighbor
             if neighbor not in visited:
                 # Recursively explore the neighbor
                 if dfs(neighbor, visited, node):
-                    return True
+                    cycle_found = True
             # Visited neighbor that is not the parent (indicates a cycle)
             elif neighbor != parent:
-                return True
+                cycle_found = True
         
-        return False
+        return cycle_found
     
     # Track visited nodes
     visited = set()
     
+    # Track if any cycle is found
+    overall_cycle = False
+    
     # Check each node as a potential starting point
     for node in graph:
+        # Only process unvisited nodes
         if node not in visited:
             # Create a new set for the current component
             component_visited = set()
             
-            # If a cycle is found, return True
+            # If a cycle is found in this component, mark overall cycle
             if dfs(node, component_visited):
-                return True
+                overall_cycle = True
             
             # Mark the entire component as visited
             visited.update(component_visited)
     
-    return False
+    return overall_cycle
