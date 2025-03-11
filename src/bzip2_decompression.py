@@ -47,5 +47,6 @@ def decompress_bzip2_file(compressed_file_path, output_path=None):
 
         return output_path
 
-    except bz2.BZip2Error:
-        raise ValueError(f"Invalid bzip2 compressed file: {compressed_file_path}")
+    except OSError as e:
+        # Catch invalid data stream errors or other bzip2 related exceptions
+        raise ValueError(f"Invalid bzip2 compressed file: {compressed_file_path}") from e
